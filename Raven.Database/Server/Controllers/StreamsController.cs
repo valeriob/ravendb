@@ -352,6 +352,11 @@ namespace Raven.Database.Server.Controllers
                                 OutputCsvValue(token.Value<string>());
                             }
                             writer.Write(',');
+                            if (metadata.TryGetValue("@metadata", out token))
+                            {
+                                OutputCsvValue(token.ToString(Formatting.None));
+                            }
+                            writer.Write(',');
                         }
                     }
                 }

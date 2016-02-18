@@ -89,7 +89,7 @@ namespace Raven.Tests.MailingList
             using (var store = NewRemoteDocumentStore(false, null, databaseName))
             {
                 var url = string.Format(@"http://localhost:8079/databases/{0}/studio-tasks/loadCsvFile", databaseName);
-                var tempFile = Path.GetTempFileName() + ".csv";
+                var tempFile = Path.GetTempFileName();
 
 
                 var csvJson = "\"" + json.Replace("\"", "\"\"") + "\"";
@@ -129,7 +129,7 @@ namespace Raven.Tests.MailingList
             using (var store = NewRemoteDocumentStore(true, null, databaseName))
             {
                 var uploadUrl = string.Format(@"http://localhost:8079/databases/{0}/studio-tasks/loadCsvFile", databaseName);
-                var uploadTempFile = Path.GetTempFileName() + ".csv";
+                var uploadTempFile = Path.GetTempFileName();
 
 
                 var csvJson = "\"" + json.Replace("\"", "\"\"") + "\"";
@@ -150,7 +150,7 @@ namespace Raven.Tests.MailingList
 
                 var downloadUrl = string.Format(@"http://localhost:8079/databases/{0}/streams/query/Raven/DocumentsByEntityName?format=excel&download=true&query=Tag:{1}",
                 databaseName, entityName);
-                var downloadTempFile = Path.GetTempFileName() + ".csv";
+                var downloadTempFile = Path.GetTempFileName();
 
                 using (var wc = new WebClient())
                 {
