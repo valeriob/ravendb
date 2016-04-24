@@ -578,6 +578,11 @@ for(var customFunction in customFunctions) {{
                                 metadata[Constants.RavenClrType] = value;
                                 id = id ?? value + "/";
                             }
+                            else if (string.Equals("metadata", column, StringComparison.OrdinalIgnoreCase))
+                            {
+                                var json = record[index].TrimStart('\"').TrimEnd('\"').Replace("\"\"", "\"");
+                                metadata = RavenJObject.Parse(json);
+                            }
                             else
                             {
                                 document[column] = SetValueInDocument(value);

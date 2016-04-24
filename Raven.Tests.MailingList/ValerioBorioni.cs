@@ -135,6 +135,8 @@ namespace Raven.Tests.MailingList
         {
             using (var store = NewRemoteDocumentStore(false, null, databaseName))
             {
+                store.Conventions.FindTypeTagName = t => t.Name;
+
                 var url = string.Format(@"http://localhost:8079/databases/{0}/studio-tasks/loadCsvFile", databaseName);
                 var tempFile = Path.GetTempFileName();
 
@@ -152,7 +154,10 @@ namespace Raven.Tests.MailingList
 
                 using (var session = store.OpenSession(databaseName))
                 {
-                    var entity = session.Query<CsvEntity>().Customize(r => r.WaitForNonStaleResults()).First();
+                    var entityByQyery = session.Query<CsvEntity>().Customize(r => r.WaitForNonStaleResults()).First();
+                    Assert.NotNull(entityByQyery);
+
+                    var entity = session.Load<CsvEntity>(documentId);
                     Assert.NotNull(entity);
 
                     var metadata = session.Advanced.GetMetadataFor(entity);
@@ -175,6 +180,8 @@ namespace Raven.Tests.MailingList
         {
             using (var store = NewRemoteDocumentStore(true, null, databaseName))
             {
+                store.Conventions.FindTypeTagName = t => t.Name;
+
                 var uploadUrl = string.Format(@"http://localhost:8079/databases/{0}/studio-tasks/loadCsvFile", databaseName);
                 var uploadTempFile = Path.GetTempFileName();
 
@@ -212,26 +219,65 @@ namespace Raven.Tests.MailingList
                         var headers = csvReader.ReadFields();
 
                         Assert.Equal("@id", headers[0]);
-                        Assert.Equal("Property_A", headers[1]);
-                        Assert.Equal("@metadata", headers[2]);
+                        Assert.Equal("@metadata", headers[1]);
+                        Assert.Equal("Property_A", headers[2]);
+                        Assert.Equal("Value", headers[3]);
 
                         var record = csvReader.ReadFields();
-                        var json = record[2].TrimStart('\"').TrimEnd('\"').Replace("\"\"", "\"");
+                        var json = record[1].TrimStart('\"').TrimEnd('\"').Replace("\"\"", "\"");
+                        //Assert.Equal("", json);
                         var metadata = RavenJObject.Parse(json);
                         metadata.Remove("Raven-Last-Modified");
                         metadata.Remove("Last-Modified");
                         metadata.Remove("@etag");
 
-                        var areEquals = RavenJToken.DeepEquals(metadata, originalMetadata);
+
+                        var metadataProperty1_Ok = RavenJToken.DeepEquals(metadata["Raven-Entity-Name"], originalMetadata["Raven-Entity-Name"]);
+                        Assert.True(metadataProperty1_Ok);
+
+                        var metadataProperty2_Ok = RavenJToken.DeepEquals(metadata["Raven-Clr-Type"], originalMetadata["Raven-Clr-Type"]);
+                        Assert.True(metadataProperty2_Ok);
+
+
+                        var metadataProperty3_Ok = RavenJToken.DeepEquals(metadata["Ensure-Unique-Constraints"], originalMetadata["Ensure-Unique-Constraints"]);
+                        Assert.True(metadataProperty3_Ok);
+
 
                         Assert.Equal(originalMetadata.ToString(), metadata.ToString());
-                        Assert.True(areEquals);
                     }
 
                 }
 
             }
         }
+
+        //public static bool DeepContains(RavenJObject container, RavenJObject contained)
+        //{
+        //    foreach (var value in contained.Values)
+        //    {
+        //        if(value is RavenJArray)
+        //        {
+
+        //        }
+        //        if(value is RavenJObject)
+        //        {
+
+        //        }
+        //        if(value is RavenJValue)
+        //        {
+        //            var valueContainer = container.Value<RavenJValue>(value);
+        //            var valueContained = (RavenJValue)value;
+
+        //        }
+        //        //var valueContainer = container.Value<RavenJObject>(value);
+        //        //var valueContained = contained.Value<RavenJObject>(value);
+        //        //var valueOk = DeepContains(valueContainer, valueContained);
+        //        //if (valueOk == false)
+        //        //    return false;
+        //    }
+
+        //    return true;
+        //}
 
 
         public class CsvEntity

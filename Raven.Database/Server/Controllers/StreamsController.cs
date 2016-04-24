@@ -352,6 +352,9 @@ namespace Raven.Database.Server.Controllers
                                 OutputCsvValue(token.Value<string>());
                             }
                             writer.Write(',');
+
+                            OutputCsvValue(metadata.ToString(Formatting.None));
+                            writer.Write(',');
                         }
                     }
                 }
@@ -408,6 +411,9 @@ namespace Raven.Database.Server.Controllers
                         if (metadata.TryGetValue("@id", out token))
                         {
                             OutputCsvValue("@id");
+                            writer.Write(',');
+
+                            OutputCsvValue("@metadata");
                             writer.Write(',');
 
                             includeId = true;
